@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Maroc Hub</title>
+<style>
+body{margin:0;background:#0b1020;color:white;font-family:Arial,sans-serif}
+header{text-align:center;padding:25px;background:#17213d}
+h1{color:#a5b4fc}
+main{max-width:800px;margin:auto;padding:20px}
+input{width:100%;padding:14px;box-sizing:border-box;border-radius:10px;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:20px}
+article{background:#17213d;border:1px solid #344365;border-radius:12px;padding:16px}
+a{color:#a5b4fc}
+p{line-height:1.7;color:#d4d9e9}
+</style>
+</head>
+<body>
+<header>
+<h1>🇲🇦 AI Maroc Hub</h1>
+<p>الذكاء الاصطناعي كامل فبلاصة وحدة</p>
+</header>
+<main>
+<h2>قلب على الأدوات ديالك</h2>
+<input id="search" placeholder="قلب على أداة...">
+<div class="grid" id="tools">
+<article><h3>💬 ChatGPT</h3><p>للكتابة والأفكار والإجابات.</p><a href="https://chatgpt.com/">فتح الأداة</a></article>
+<article><h3>🎨 Canva</h3><p>لتصميم الصور والمنشورات.</p><a href="https://www.canva.com/">فتح الأداة</a></article>
+<article><h3>🎬 CapCut</h3><p>لتحرير الفيديوهات.</p><a href="https://www.capcut.com/">فتح الأداة</a></article>
+<article><h3>🌐 الترجمة</h3><p>ترجمة النصوص بين اللغات.</p><a href="https://translate.google.com/">فتح الأداة</a></article>
+<article><h3>✍️ مساعد الأفكار</h3><p>طوّر أفكار المشاريع والقصص.</p><a href="https://chatgpt.com/">جرّب</a></article>
+</div>
+</main>
+<script>
+document.getElementById('search').addEventListener('input',function(){
+let q=this.value.toLowerCase();
+document.querySelectorAll('article').forEach(a=>{
+a.style.display=a.innerText.toLowerCase().includes(q)?'':'none';
+});
+});
+</script>
+</body>
+</html>
