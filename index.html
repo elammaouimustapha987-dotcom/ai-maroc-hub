@@ -4,41 +4,130 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Maroc Hub</title>
+<meta name="theme-color" content="#0b1020">
+<title>AI Maroc Hub 🇲🇦</title>
 <style>
-body{margin:0;background:#0b1020;color:white;font-family:Arial,sans-serif}
-header{text-align:center;padding:25px;background:#17213d}
-h1{color:#a5b4fc}
-main{max-width:800px;margin:auto;padding:20px}
-input{width:100%;padding:14px;box-sizing:border-box;border-radius:10px;font-size:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:20px}
-article{background:#17213d;border:1px solid #344365;border-radius:12px;padding:16px}
-a{color:#a5b4fc}
-p{line-height:1.7;color:#d4d9e9}
+:root{--bg:#0b1020;--panel:#151e32;--border:#2c3a56;--text:#f4f6ff;--muted:#b5bfd4;--blue:#70aaff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Tahoma,sans-serif;line-height:1.7}
+header{text-align:center;padding:28px 15px;background:#111a30;border-bottom:1px solid var(--border)}
+header h1{color:var(--blue);margin:0}
+header p{color:var(--muted);margin:5px 0}
+nav{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:12px}
+button{cursor:pointer;border:1px solid var(--border);border-radius:10px;padding:11px 15px;background:var(--panel);color:var(--text);font-size:15px}
+button:hover,button.active{background:var(--blue);color:#071020}
+main{max-width:1000px;margin:auto;padding:16px}
+section{margin-bottom:36px;scroll-margin-top:15px}
+input,textarea{width:100%;padding:13px;background:#10182a;color:white;border:1px solid var(--border);border-radius:10px;font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:18px}
+article,.chat{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:17px}
+article h3{margin:0}
+article p,.muted{color:var(--muted)}
+a{color:var(--blue);text-decoration:none;display:inline-block;margin-top:8px}
+a:hover{text-decoration:underline}
+#messages{max-height:350px;overflow:auto;margin:15px 0}
+.message{background:#202c45;padding:10px;border-radius:9px;margin:8px 0;overflow-wrap:anywhere;white-space:pre-wrap}
+#chatForm{display:grid;gap:10px}
+.status{font-size:13px;color:var(--muted)}
+footer{text-align:center;color:var(--muted);padding:24px}
+[hidden]{display:none!important}
+@media(max-width:500px){main{padding:12px}.grid{grid-template-columns:1fr}header h1{font-size:26px}}
 </style>
 </head>
 <body>
 <header>
 <h1>🇲🇦 AI Maroc Hub</h1>
-<p>الذكاء الاصطناعي كامل فبلاصة وحدة</p>
+<p>منصتك المغربية لأدوات الذكاء الاصطناعي</p>
 </header>
+
+<nav>
+<button onclick="go('tools')">🧰 مكتبة الأدوات</button>
+<button onclick="go('assistant')">🤖 المساعد الذكي</button>
+</nav>
+
 <main>
-<h2>قلب على الأدوات ديالك</h2>
-<input id="search" placeholder="قلب على أداة...">
-<div class="grid" id="tools">
-<article><h3>💬 ChatGPT</h3><p>للكتابة والأفكار والإجابات.</p><a href="https://chatgpt.com/">فتح الأداة</a></article>
-<article><h3>🎨 Canva</h3><p>لتصميم الصور والمنشورات.</p><a href="https://www.canva.com/">فتح الأداة</a></article>
-<article><h3>🎬 CapCut</h3><p>لتحرير الفيديوهات.</p><a href="https://www.capcut.com/">فتح الأداة</a></article>
-<article><h3>🌐 الترجمة</h3><p>ترجمة النصوص بين اللغات.</p><a href="https://translate.google.com/">فتح الأداة</a></article>
-<article><h3>✍️ مساعد الأفكار</h3><p>طوّر أفكار المشاريع والقصص.</p><a href="https://chatgpt.com/">جرّب</a></article>
+<section id="tools">
+<h2>🧰 اكتشف الأدوات</h2>
+<p class="muted">قلب على الأداة أو اختار التصنيف.</p>
+<input id="search" type="search" placeholder="🔎 قلب على ChatGPT أو التصميم...">
+
+<nav>
+<button class="active" data-cat="all">الكل</button>
+<button data-cat="chat">المحادثة</button>
+<button data-cat="design">التصميم</button>
+<button data-cat="video">الفيديو</button>
+<button data-cat="other">أخرى</button>
+</nav>
+
+<div class="grid" id="toolsGrid">
+<article data-cat="chat"><h3>💬 ChatGPT</h3><p>الكتابة والتعلم والبرمجة.</p><a href="https://chatgpt.com/" target="_blank" rel="noopener">فتح الأداة ↗</a></article>
+<article data-cat="chat"><h3>🧠 Gemini</h3><p>مساعد الذكاء الاصطناعي من Google.</p><a href="https://gemini.google.com/" target="_blank" rel="noopener">فتح الأداة ↗</a></article>
+<article data-cat="design"><h3>🎨 Canva</h3><p>تصميم الصور والمنشورات.</p><a href="https://www.canva.com/" target="_blank" rel="noopener">فتح الأداة ↗</a></article>
+<article data-cat="video"><h3>🎬 CapCut</h3><p>تعديل الفيديوهات وصناعة المحتوى.</p><a href="https://www.capcut.com/" target="_blank" rel="noopener">فتح الأداة ↗</a></article>
+<article data-cat="other"><h3>🌐 Google Translate</h3><p>ترجمة النصوص بين اللغات.</p><a href="https://translate.google.com/" target="_blank" rel="noopener">فتح الأداة ↗</a></article>
+<article data-cat="design"><h3>🖼️ Adobe Express</h3><p>إنشاء التصاميم والمحتوى.</p><a href="https://www.adobe.com/express/" target="_blank" rel="noopener">فتح الأداة ↗</a></article>
 </div>
+<p id="empty" hidden>ما لقينا حتى أداة مطابقة.</p>
+</section>
+
+<section id="assistant">
+<h2>🤖 المساعد الذكي المغربي</h2>
+<div class="chat">
+<p>مرحبا! كتب سؤالك باش تجرب واجهة المحادثة.</p>
+<div id="messages" aria-live="polite">
+<div class="message">مرحبا بك فـ AI Maroc Hub 🇲🇦. واجهة المساعد جاهزة، والربط بخدمة الذكاء الاصطناعي هو الخطوة المقبلة.</div>
+</div>
+<form id="chatForm">
+<textarea id="question" rows="3" placeholder="كتب سؤالك هنا..." required></textarea>
+<button type="submit">إرسال السؤال</button>
+</form>
+<p class="status" id="status">الحالة: المساعد غير مربوط بعد بخدمة ذكاء اصطناعي.</p>
+</div>
+</section>
 </main>
+<footer>AI Maroc Hub 🇲🇦 — مشروع قيد التطوير</footer>
+
 <script>
-document.getElementById('search').addEventListener('input',function(){
-let q=this.value.toLowerCase();
-document.querySelectorAll('article').forEach(a=>{
-a.style.display=a.innerText.toLowerCase().includes(q)?'':'none';
+const search=document.getElementById('search');
+const cards=[...document.querySelectorAll('#toolsGrid article')];
+let category='all';
+
+function filter(){
+ const q=search.value.trim().toLowerCase();
+ let count=0;
+ cards.forEach(card=>{
+  const show=card.innerText.toLowerCase().includes(q)&&
+   (category==='all'||card.dataset.cat===category);
+  card.hidden=!show;
+  if(show)count++;
+ });
+ document.getElementById('empty').hidden=count!==0;
+}
+search.addEventListener('input',filter);
+document.querySelectorAll('[data-cat]').forEach(btn=>{
+ btn.addEventListener('click',()=>{
+  category=btn.dataset.cat;
+  document.querySelectorAll('[data-cat]').forEach(b=>b.classList.toggle('active',b===btn));
+  filter();
+ });
 });
+function go(id){document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+document.getElementById('chatForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const input=document.getElementById('question');
+ const value=input.value.trim();
+ if(!value)return;
+ const messages=document.getElementById('messages');
+ const user=document.createElement('div');
+ user.className='message';
+ user.textContent='أنت: '+value;
+ messages.appendChild(user);
+ const reply=document.createElement('div');
+ reply.className='message';
+ reply.textContent='وصلنا سؤالك للواجهة بنجاح. باش نجاوبك بذكاء اصطناعي حقيقي، خاصنا نربطو الموقع بخادم آمن وخدمة ذكاء اصطناعي.';
+ messages.appendChild(reply);
+ input.value='';
+ messages.scrollTop=messages.scrollHeight;
 });
 </script>
 </body>
