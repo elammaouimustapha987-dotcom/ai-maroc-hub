@@ -28,6 +28,7 @@ a:hover{text-decoration:underline}
 #messages{max-height:350px;overflow:auto;margin:15px 0}
 .message{background:#202c45;padding:10px;border-radius:9px;margin:8px 0;overflow-wrap:anywhere;white-space:pre-wrap}
 #chatForm{display:grid;gap:10px}
+button:disabled{opacity:.65;cursor:wait}
 .status{font-size:13px;color:var(--muted)}
 footer{text-align:center;color:var(--muted);padding:24px}
 [hidden]{display:none!important}
@@ -75,13 +76,13 @@ footer{text-align:center;color:var(--muted);padding:24px}
 <div class="chat">
 <p>مرحبا! كتب سؤالك باش تجرب واجهة المحادثة.</p>
 <div id="messages" aria-live="polite">
-<div class="message">مرحبا بك فـ AI Maroc Hub 🇲🇦. واجهة المساعد جاهزة، والربط بخدمة الذكاء الاصطناعي هو الخطوة المقبلة.</div>
+<div class="message">مرحبا بك فـ AI Maroc Hub 🇲🇦. اكتب سؤالك لبدء المحادثة.</div>
 </div>
 <form id="chatForm">
-<textarea id="question" rows="3" placeholder="كتب سؤالك هنا..." required></textarea>
-<button type="submit">إرسال السؤال</button>
+<textarea id="question" rows="3" maxlength="2000" placeholder="كتب سؤالك هنا..." required></textarea>
+<button id="sendQuestion" type="submit">إرسال السؤال</button>
 </form>
-<p class="status" id="status">الحالة: المساعد غير مربوط بعد بخدمة ذكاء اصطناعي.</p>
+<p class="status" id="status" role="status" aria-live="polite">الحالة: جارٍ إعداد الاتصال.</p>
 </div>
 </section>
 </main>
@@ -112,22 +113,106 @@ document.querySelectorAll('[data-cat]').forEach(btn=>{
  });
 });
 function go(id){document.getElementById(id).scrollIntoView({behavior:'smooth'});}
-document.getElementById('chatForm').addEventListener('submit',e=>{
+const API_BASE_URL = 'https://YOUR_BACKEND_HOST'; // Set to the deployed backend's public URL. Never put an API key here.
+const backendBaseUrl = (() => {
+ try {
+  const url = new URL(API_BASE_URL);
+  const isLocal = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  if (API_BASE_URL.includes('YOUR_BACKEND_HOST')) return '';
+  if (url.protocol !== 'https:' && !(isLocal && url.protocol === 'http:')) return '';
+  return API_BASE_URL.replace(/\/+$/, '');
+ } catch { return ''; }
+})();
+const chatForm = document.getElementById('chatForm');
+const input = document.getElementById('question');
+const messages = document.getElementById('messages');
+const statusEl = document.getElementById('status');
+const sendButton = document.getElementById('sendQuestion');
+let chatIsLoading = false;
+
+function setChatStatus(text) {
+ statusEl.textContent = 'الحالة: ' + text;
+}
+function addChatMessage(label, text) {
+ const item = document.createElement('div');
+ item.className = 'message';
+ item.textContent = label + ': ' + text;
+ messages.appendChild(item);
+ messages.scrollTop = messages.scrollHeight;
+ return item;
+}
+function chatErrorForStatus(status) {
+ const errors = {
+  400: 'الرسالة غير صالحة. اكتب نصاً لا يتجاوز 2000 حرف.',
+  403: 'الخادم لا يسمح لهذا الموقع بالاتصال. تحقق من إعداد ALLOWED_ORIGINS.',
+  404: 'رابط الخادم غير صحيح أو مسار المحادثة غير متاح.',
+  429: 'تم تجاوز عدد الطلبات المسموح به مؤقتاً. حاول بعد قليل.',
+  500: 'حدث خطأ في الخادم. حاول مرة أخرى لاحقاً.',
+  502: 'تعذر على مزود الذكاء الاصطناعي إكمال الطلب. حاول لاحقاً.',
+  503: 'الخدمة غير مهيأة بعد. على مسؤول الخادم إضافة مفتاح المزود في أسرار الخادم.',
+  504: 'استغرق الرد وقتاً طويلاً. حاول مرة أخرى.'
+ };
+ return errors[status] || 'تعذر إكمال الطلب. حاول مرة أخرى لاحقاً.';
+}
+
+setChatStatus(backendBaseUrl ? 'المساعد جاهز لاستقبال سؤالك.' : 'أضف رابط الخادم المنشور في API_BASE_URL لتفعيل المحادثة.');
+chatForm.addEventListener('submit', async e => {
  e.preventDefault();
- const input=document.getElementById('question');
- const value=input.value.trim();
- if(!value)return;
- const messages=document.getElementById('messages');
- const user=document.createElement('div');
- user.className='message';
- user.textContent='أنت: '+value;
- messages.appendChild(user);
- const reply=document.createElement('div');
- reply.className='message';
- reply.textContent='وصلنا سؤالك للواجهة بنجاح. باش نجاوبك بذكاء اصطناعي حقيقي، خاصنا نربطو الموقع بخادم آمن وخدمة ذكاء اصطناعي.';
- messages.appendChild(reply);
- input.value='';
- messages.scrollTop=messages.scrollHeight;
+ if (chatIsLoading) return;
+ const value = input.value.trim();
+ if (!value) return;
+ if (value.length > 2000) {
+  setChatStatus('الرسالة طويلة جداً. الحد الأقصى هو 2000 حرف.');
+  return;
+ }
+ if (!backendBaseUrl) {
+  setChatStatus('أضف رابط الخادم المنشور في API_BASE_URL لتفعيل المحادثة.');
+  return;
+ }
+
+ chatIsLoading = true;
+ sendButton.disabled = true;
+ input.disabled = true;
+ sendButton.textContent = 'جارٍ الإرسال...';
+ addChatMessage('أنت', value);
+ const loadingMessage = addChatMessage('المساعد', 'جارٍ تجهيز الرد...');
+ loadingMessage.setAttribute('role', 'status');
+ setChatStatus('جارٍ الاتصال بالمساعد...');
+ let failureMessage = '';
+
+ try {
+  const response = await fetch(backendBaseUrl + '/api/chat', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+   body: JSON.stringify({ message: value })
+  });
+  let data = {};
+  try { data = await response.json(); } catch { data = {}; }
+  if (!response.ok) {
+   failureMessage = chatErrorForStatus(response.status);
+   throw new Error('Chat request failed');
+  }
+  if (typeof data.reply !== 'string' || !data.reply.trim()) {
+   failureMessage = chatErrorForStatus(502);
+   throw new Error('Invalid chat response');
+  }
+
+  loadingMessage.remove();
+  addChatMessage('المساعد', data.reply);
+  input.value = '';
+  setChatStatus('تم استلام الرد.');
+ } catch {
+  loadingMessage.remove();
+  const message = failureMessage || 'تعذر الاتصال بالخادم. تحقق من الرابط وإعداد ALLOWED_ORIGINS ثم حاول مجدداً.';
+  addChatMessage('تنبيه', message);
+  setChatStatus(message);
+ } finally {
+  chatIsLoading = false;
+  sendButton.disabled = false;
+  input.disabled = false;
+  sendButton.textContent = 'إرسال السؤال';
+  messages.scrollTop = messages.scrollHeight;
+ }
 });
 </script>
 </body>
